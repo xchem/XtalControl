@@ -10,11 +10,11 @@ metadata = {
 
 # ----------- Pulling in data / trimming -----------------------
 
-xcePath = 'python_scripts/XtalControl/EV712A Mature DIMPLE export 2026-03-04_untrimmed.csv'
+xcePath = 'python_scripts/XtalControl/Raw_data/3C_xceexport_marchsometime.csv'
 xceImport = pd.read_csv(xcePath)
 
 codePath = 'python_scripts/XtalControl/control-plate-map.csv'
-codeImport = pd.read_csv(codePath)                 # NOT DONE: Use this to trim the rows in xceImport
+codeImport = pd.read_csv(codePath)                 # This is used to trim the rows in xceImport
 
 compoundStockConcentration = 500 # mM !! Check this !!
 
@@ -32,19 +32,19 @@ xceImport.drop(columns="KeepCode") # drops KeepCode (no longer needed)
 mountCutoffFailure = 49
 mountCutoffPartial = 70
 
-diffractCutoffFailure = 0.1              # this just makes the parameter editable, not expected to change: (diff attempt - diff success) > 0.1 = FAIL
+diffractCutoffFailure = 0.1                # this just makes the parameter editable, not expected to change: (diff attempt - diff success) > 0.1 = FAIL
 
 resolutionCutoffFailure = 3.0
 resolutionCutoffPartial = 2.2
 
-dimpleRunCutoffFailure = 34               # (Diffract success - Dimple success) < cutoff = Pass 
+dimpleRunCutoffFailure = 34                # (Diffract success - Dimple success) < cutoff = Pass 
 dimpleRunCutoffPartial = 0
 
 rCrystCutoff = 0.40                        # Cutoff boundary
 rFreeCutoff = 0.35
 
-modelBuildingCutoffFailure = 49                                                                   # i.e. diffract attempt % - Dimple success % > 49 = FAIL (100 - 33 = 66, 66 > 49 = Fail)
-modelBuildingCutoffPartial = 25                                                                   # e.g. 100 - 66 = 33, 33 > 25 = PARTIAL (fail rate of 1 in 3)
+modelBuildingCutoffFailure = 49            # i.e. diffract attempt % - Dimple success % > 49 = FAIL (100 - 33 = 66, 66 > 49 = Fail)
+modelBuildingCutoffPartial = 25            # e.g. 100 - 66 = 33, 33 > 25 = PARTIAL (fail rate of 1 in 3)
 
 # -------------- END PARAMETERS -----------------------
 
@@ -230,10 +230,10 @@ soaksCollated = soaksCollated.sort_values(
 
 soaksCollated["In-Drop Molarity (mM)"] = (soaksCollated["Solvent Fraction"]/100)*compoundStockConcentration
 commonTransferFrac = soaksCollated["Solvent Fraction"].mode()[0]
-soaksCollated["Theoretical Source Molarity (mM)"] = (soaksCollated["In-Drop Molarity (mM)"]*commonTransferFrac)
+soaksCollated["Theoretical Source Molarity (mM)"] = ((soaksCollated["In-Drop Molarity (mM)"]) * (100 / commonTransferFrac))
 
 # print(soaksCollated)
-soaksCollated.to_csv("python_scripts/CrystControl/soakOutput.csv")
+soaksCollated.to_csv("python_scripts/XtalControl/soakOutput.csv")
 
 # ------------- table visualisation ----------------------
 # most of this section is vibecoded
@@ -286,7 +286,7 @@ def shadeGroups(row):
     .set_properties(subset=['Compound Code', 'Solvent Fraction', 'Theoretical Source Molarity (mM)'], **{'font-weight': 'bold'})
     .hide(subset=['_groupIndex'], axis='columns')
     .hide(axis="index")
-    .to_html(buf="python_scripts/CrystControl/soakOutputHTML.html", bold_headers=True, doctype_html=True)
+    .to_html(buf="python_scripts/XtalControl/soakOutputHTML.html", bold_headers=True, doctype_html=True)
 )
 
 soaksCollated = soaksCollated.drop(columns='_groupIndex')
